@@ -1,6 +1,6 @@
 use std::io::{self, Write};
-use crossterm::terminal::{self, enable_raw_mode, disable_raw_mode, ClearType};
-use crossterm::{cursor, queue, style};
+use crossterm::terminal::{self, enable_raw_mode, disable_raw_mode, ClearType, EnterAlternateScreen, LeaveAlternateScreen};
+use crossterm::{cursor, execute, queue, style};
 use crossterm::event::{self, Event, KeyCode};
 
 // State representation - we need to save where the cursor is at (x, y) and the text being written
@@ -27,7 +27,10 @@ fn main() -> io::Result<()> {
     let mut stdout = io::stdout();
 
     enable_raw_mode()?;
-    println!("Raw mode enabled. press 'q' to exit!");
+
+    execute!(stdout, EnterAlternateScreen)?;
+
+    println!("Welcom to iktib text editor. Press 'Esc' to exit!");
 
     loop {
 
@@ -69,6 +72,8 @@ fn main() -> io::Result<()> {
         
     }
 
+    execute!(stdout, LeaveAlternateScreen)?;
     disable_raw_mode()?;
+    
     Ok(())
 }
