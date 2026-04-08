@@ -52,7 +52,11 @@ fn main() -> io::Result<()> {
             queue!(stdout, style::Print(line), cursor::MoveToNextLine(1))?;
         }
 
-        // New line if string reached max width
+        // Adds a new String element to vector if the last line in the buffer is equal to the width of the window
+        // -- This only creates a new line if the last elemebt if the buffer is max width and not the line
+        // before the cursor
+        // TODO: change it so if it is the line before the cursor (when cursor feature is addedC)
+
         if let Some(last) = editor.buffer.last_mut() {
             if last.chars().count() == width as usize {
                 editor.buffer.push(String::new());
@@ -82,9 +86,25 @@ fn main() -> io::Result<()> {
                 },
 
                 KeyCode::Backspace => {
-                    let cur_line = &mut editor.buffer[editor.y as usize];
-                    cur_line.pop();
-                    editor.x -= 1;
+                    if editor.x == 0 && editor.y == 0 {
+                        continue;
+                    } else if editor.x == 0 {
+                        let prev_line = &mut editor.buffer[(editor.y as usize) - 1];
+                        editor.x = prev_line.chars().count() as u16;
+                        editor.y -= 1;
+                        editor.buffer.pop();
+                        
+                    } else {
+                        let cur_line = &mut editor.buffer[editor.y as usize];
+                        cur_line.pop();
+                        editor.x -= 1;
+                    }
+                },
+
+                KeyCode::Enter => {
+                    editor.buffer.push(String::new());
+                    editor.x = 0;
+                    editor.y += 1;
                 },
 
                 _ => {}
