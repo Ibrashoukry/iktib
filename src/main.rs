@@ -30,15 +30,13 @@ fn main() -> io::Result<()> {
 
     execute!(stdout, EnterAlternateScreen)?;
 
-    println!("Welcom to iktib text editor. Press 'Esc' to exit!");
-
     loop {
 
         // STEP 1 -- Draw: Clear the screen and print Vec<String>
 
         // Clear screen and move invisible cursor to top left of screen (0, 0)
         queue!(stdout, terminal::Clear(ClearType::All), cursor::MoveTo(0, 0))?;
-
+	
         // Print every line we have in memory
         for line in &editor.buffer {
             queue!(stdout, style::Print(line), cursor::MoveToNextLine(1))?;
@@ -63,6 +61,12 @@ fn main() -> io::Result<()> {
                     cur_line.insert(editor.x as usize, c);
                     editor.x += 1;
 
+                },
+
+                KeyCode::Backspace => {
+                    let cur_line = &mut editor.buffer[editor.y as usize];
+                    cur_line.pop();
+                    editor.x -= 1;
                 },
 
                 _ => {}
