@@ -59,6 +59,10 @@ fn main() -> io::Result<()> {
             editor.y += 1;
         }
 
+        if editor.x as usize > editor.buffer[editor.y as usize].chars().count() {
+            editor.x = editor.buffer[editor.y as usize].chars().count() as u16;
+        }
+
         // Move actual cursor to where x, y variables are
         queue!(stdout, cursor::MoveTo(editor.x, editor.y))?;
 
@@ -90,7 +94,7 @@ fn main() -> io::Result<()> {
                         
                     } else {
                         let cur_line = &mut editor.buffer[editor.y as usize];
-                        cur_line.pop();
+                        cur_line.remove((editor.x as usize) - 1);
                         editor.x -= 1;
                     }
                 },
@@ -100,6 +104,24 @@ fn main() -> io::Result<()> {
                     editor.x = 0;
                     editor.y += 1;
                 },
+
+                // Move Cursor
+                KeyCode::Right => {
+                    editor.x += 1;
+                },
+                
+                KeyCode::Left => {
+                    editor.x -= 1;
+                },
+
+                KeyCode::Up => {
+                    editor.y -= 1;
+                },
+
+                KeyCode::Down => {
+                    editor.y += 1;
+                },
+
 
                 _ => {}
 
