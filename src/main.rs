@@ -1,5 +1,12 @@
 use std::io::{self, Write};
-use crossterm::terminal::{self, enable_raw_mode, disable_raw_mode, ClearType, EnterAlternateScreen, LeaveAlternateScreen};
+use crossterm::terminal::{
+    self,
+    size,
+    enable_raw_mode, 
+    disable_raw_mode, 
+    ClearType, 
+    EnterAlternateScreen, 
+    LeaveAlternateScreen};
 use crossterm::{cursor, execute, queue, style};
 use crossterm::event::{self, Event, KeyCode};
 
@@ -30,6 +37,9 @@ fn main() -> io::Result<()> {
 
     execute!(stdout, EnterAlternateScreen)?;
 
+    // Get window size
+    let (width, _height) = size()?;
+
     loop {
 
         // STEP 1 -- Draw: Clear the screen and print Vec<String>
@@ -42,21 +52,29 @@ fn main() -> io::Result<()> {
             queue!(stdout, style::Print(line), cursor::MoveToNextLine(1))?;
         }
 
+        // New line if string reached max width
+        if let Some(last) = editor.buffer.last_mut() {
+            if last.chars().count() == width as usize {
+                editor.buffer.push(String::new());
+                editor.x = 0;
+                editor.y += 1;
+            }
+        }
+
         // Move actual cursor to where x, y variables are
         queue!(stdout, cursor::MoveTo(editor.x, editor.y))?;
 
         stdout.flush()?;
 
-        // STEP 2 -- Read: Use crossterm to capture a single press
+        // STEP 2 -- Read & Update: Use crossterm to capture a single press and update Vec<String> accordingly
 
         // Wait for user to input a key
         if let Event::Key(key) = event::read()? {
             match key.code {
-                // if key is Esc then exit program
                 KeyCode::Esc => break,
 
-                // STEP 3 -- Update: If a letter, add to a Vec<String>
                 KeyCode::Char(c) => {
+
                     let cur_line = &mut editor.buffer[editor.y as usize];
                     cur_line.insert(editor.x as usize, c);
                     editor.x += 1;
