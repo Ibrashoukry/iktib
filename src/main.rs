@@ -52,17 +52,11 @@ fn main() -> io::Result<()> {
             queue!(stdout, style::Print(line), cursor::MoveToNextLine(1))?;
         }
 
-        // Adds a new String element to vector if the last line in the buffer is equal to the width of the window
-        // -- This only creates a new line if the last elemebt if the buffer is max width and not the line
-        // before the cursor
-        // TODO: change it so if it is the line before the cursor (when cursor feature is addedC)
-
-        if let Some(last) = editor.buffer.last_mut() {
-            if last.chars().count() == width as usize {
-                editor.buffer.push(String::new());
-                editor.x = 0;
-                editor.y += 1;
-            }
+        // Adds a new String element to vector if the line at the current cursor is equal to the width of the window
+        if editor.x == width {
+            editor.buffer.push(String::new());
+            editor.x = 0;
+            editor.y += 1;
         }
 
         // Move actual cursor to where x, y variables are
