@@ -91,8 +91,8 @@ fn main() -> io::Result<()> {
                     } else if editor.x == 0 {
                         let prev_line = &mut editor.buffer[(editor.y as usize) - 1];
                         editor.x = prev_line.chars().count() as u16;
+                        editor.buffer.remove(editor.y as usize);
                         editor.y -= 1;
-                        editor.buffer.pop();
                         buf_len -= 1;
                         
                     } else {
@@ -103,7 +103,24 @@ fn main() -> io::Result<()> {
                 },
 
                 KeyCode::Enter => {
-                    editor.buffer.push(String::new());
+                    let x = editor.x as usize;
+                    let y = editor.y as usize;
+
+                    let line = &mut editor.buffer[y];
+                    
+                    // Find the byte index safely (handles Unicode/Emojis)
+                    let byte_index = line
+                        .char_indices()
+                        .map(|(i, _)| i)
+                        .nth(x)
+                        .unwrap_or(line.len());
+
+                    // Split the string: current_line keeps [0..byte_index]
+                    // split_off returns a new String containing [byte_index..]
+                    let new_line = line.split_off(byte_index);
+                    
+                    editor.buffer.insert(y + 1, new_line);
+
                     editor.x = 0;
                     editor.y += 1;
                     buf_len += 1;
@@ -127,7 +144,7 @@ fn main() -> io::Result<()> {
                 },
 
                 KeyCode::Down => {
-                    if editor.y != bufLen{
+                    if editor.y != buf_len{
                         editor.y += 1;
                     }
                 },
