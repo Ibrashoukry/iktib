@@ -39,6 +39,7 @@ fn main() -> io::Result<()> {
 
     // Get window size
     let (width, _height) = size()?;
+    let mut buf_len = 0;
 
     loop {
 
@@ -57,6 +58,7 @@ fn main() -> io::Result<()> {
             editor.buffer.push(String::new());
             editor.x = 0;
             editor.y += 1;
+            buf_len += 1;
         }
 
         if editor.x as usize > editor.buffer[editor.y as usize].chars().count() {
@@ -91,6 +93,7 @@ fn main() -> io::Result<()> {
                         editor.x = prev_line.chars().count() as u16;
                         editor.y -= 1;
                         editor.buffer.pop();
+                        buf_len -= 1;
                         
                     } else {
                         let cur_line = &mut editor.buffer[editor.y as usize];
@@ -103,6 +106,7 @@ fn main() -> io::Result<()> {
                     editor.buffer.push(String::new());
                     editor.x = 0;
                     editor.y += 1;
+                    buf_len += 1;
                 },
 
                 // Move Cursor
@@ -111,15 +115,21 @@ fn main() -> io::Result<()> {
                 },
                 
                 KeyCode::Left => {
-                    editor.x -= 1;
+                    if editor.x != 0 {
+                        editor.x -= 1;
+                    }
                 },
 
                 KeyCode::Up => {
-                    editor.y -= 1;
+                    if editor.y != 0 {
+                        editor.y -= 1;
+                    }
                 },
 
                 KeyCode::Down => {
-                    editor.y += 1;
+                    if editor.y != bufLen{
+                        editor.y += 1;
+                    }
                 },
 
 
